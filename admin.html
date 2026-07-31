@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Blood Donor Directory</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-page">
+<div id="adminApp" class="app" hidden>
+  <header class="header">
+    <div class="header-top">
+      <h1>Admin Dashboard</h1>
+    </div>
+  </header>
+  <div class="toolbar admin-toolbar">
+    <button id="addMemberBtn" class="btn btn-primary">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      Add Member
+    </button>
+    <button id="logoutBtn" class="btn btn-outline">Logout</button>
+  </div>
+  <nav class="filter-bar" id="filterBar" aria-label="Filter by blood group"></nav>
+  <main class="member-list" id="memberList"></main>
+  <p id="noResults" class="no-results" hidden>
+    <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+    No members found
+  </p>
+</div>
+
+<div id="loginApp" class="app">
+  <div class="login-panel">
+    <h2>Admin Login</h2>
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="usernameInput">Email</label>
+        <input id="usernameInput" type="email" placeholder="ahnas@gmail.com" autocomplete="username">
+        <span class="error" id="usernameError"></span>
+      </div>
+      <div class="field">
+        <label for="passwordInput">Password</label>
+        <input id="passwordInput" type="password" placeholder="Password" autocomplete="current-password">
+        <span class="error" id="passwordError"></span>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-primary">Login</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="memberModal" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 id="modalTitle">Add Member</h2>
+    <form id="memberForm" novalidate>
+      <div class="field">
+        <label for="nameInput">Full Name</label>
+        <input id="nameInput" type="text" placeholder="e.g. Rahul Kumar" autocomplete="off">
+        <span class="error" id="nameError"></span>
+      </div>
+      <div class="field">
+        <label for="bloodGroupInput">Blood Group</label>
+        <select id="bloodGroupInput">
+          <option value="">Select blood group</option>
+          <option>A+</option><option>A-</option>
+          <option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option>
+          <option>O+</option><option>O-</option>
+        </select>
+        <span class="error" id="bloodGroupError"></span>
+      </div>
+      <div class="field">
+        <label for="phoneInput">Phone Number</label>
+        <input id="phoneInput" type="tel" placeholder="10-digit mobile number" autocomplete="off" maxlength="10">
+        <span class="error" id="phoneError"></span>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="cancelMemberBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="submitMemberBtn">Add Member</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="deleteModal" class="modal-overlay" hidden>
+  <div class="modal modal-small" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+    <h2 id="deleteTitle">Delete Member?</h2>
+    <p id="deleteMessage" class="modal-text"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="cancelDeleteBtn">Cancel</button>
+      <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+<script src="js/admin.js"></script>
+</body>
+</html>
