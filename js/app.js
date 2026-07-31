@@ -383,5 +383,18 @@
     }, 400);
   }
 
+  // Listen for storage changes from other windows (e.g. admin page)
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORAGE_KEY) {
+      try {
+        state.members = e.newValue ? JSON.parse(e.newValue) : [];
+        render();
+        showToast('Directory updated');
+      } catch (err) {
+        // ignore parse errors
+      }
+    }
+  });
+
   document.addEventListener('DOMContentLoaded', init);
 })();
