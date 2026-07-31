@@ -1,7 +1,7 @@
 (() => {
   const STORAGE_KEY = 'bloodDonorMembers';
   const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-  const ADMIN_EMAIL = 'ahnas';
+  const ADMIN_EMAIL = 'ahn';
   const ADMIN_PASSWORD = '123';
 
   const state = {
