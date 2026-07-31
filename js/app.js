@@ -3,14 +3,6 @@
   const THEME_KEY = 'bloodDonorTheme';
   const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
-  const SAMPLE_DATA = [
-    { name: 'Rahul', bloodGroup: 'O+', phone: '9876543210' },
-    { name: 'Arun', bloodGroup: 'A+', phone: '9123456789' },
-    { name: 'Vishnu', bloodGroup: 'B+', phone: '9988776655' },
-    { name: 'Akhil', bloodGroup: 'AB+', phone: '9871234567' },
-    { name: 'Nithin', bloodGroup: 'O-', phone: '9012345678' },
-  ];
-
   const state = {
     members: [],
     filter: 'All',
@@ -60,8 +52,7 @@
         state.members = [];
       }
     }
-    state.members = SAMPLE_DATA.map((m) => ({ id: uid(), ...m }));
-    saveMembers();
+    state.members = [];
   }
 
   function saveMembers() {
