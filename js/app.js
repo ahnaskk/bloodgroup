@@ -1,5 +1,4 @@
 (() => {
-  const STORAGE_KEY = 'bloodDonorMembers';
   const THEME_KEY = 'bloodDonorTheme';
   const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -8,11 +7,8 @@
     filter: 'All',
     search: '',
     sort: 'name-asc',
-    editingId: null,
-    deletingId: null,
   };
 
-  // Elements
   const el = {
     loader: document.getElementById('loader'),
     app: document.getElementById('app'),
@@ -21,49 +17,22 @@
     memberList: document.getElementById('memberList'),
     noResults: document.getElementById('noResults'),
     darkModeToggle: document.getElementById('darkModeToggle'),
-    toast: document.getElementById('toast'),
-
-    memberModal: document.getElementById('memberModal'),
-    modalTitle: document.getElementById('modalTitle'),
-    memberForm: document.getElementById('memberForm'),
-    nameInput: document.getElementById('nameInput'),
-    bloodGroupInput: document.getElementById('bloodGroupInput'),
-    phoneInput: document.getElementById('phoneInput'),
-    nameError: document.getElementById('nameError'),
-    bloodGroupError: document.getElementById('bloodGroupError'),
-    phoneError: document.getElementById('phoneError'),
-    cancelMemberBtn: document.getElementById('cancelMemberBtn'),
-    submitMemberBtn: document.getElementById('submitMemberBtn'),
-
-    deleteModal: document.getElementById('deleteModal'),
-    deleteMessage: document.getElementById('deleteMessage'),
-    cancelDeleteBtn: document.getElementById('cancelDeleteBtn'),
-    confirmDeleteBtn: document.getElementById('confirmDeleteBtn'),
   };
 
-  // ---------- Persistence ----------
-  function loadMembers() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      try {
-        state.members = JSON.parse(raw);
-        return;
-      } catch (e) {
-        state.members = [];
+  async function loadMembers() {
+    try {
+      const response = await fetch('./data/members.json');
+      if (!response.ok) {
+        throw new Error('Failed to load donor data');
       }
+      const data = await response.json();
+      state.members = Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.warn('Could not load members from JSON file.', error);
+      state.members = [];
     }
-    state.members = [];
   }
 
-  function saveMembers() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.members));
-  }
-
-  function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  }
-
-  // ---------- Theme ----------
   function loadTheme() {
     const theme = localStorage.getItem(THEME_KEY) ||
       (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -82,7 +51,6 @@
     applyTheme(current === 'dark' ? 'light' : 'dark');
   }
 
-  // ---------- Rendering ----------
   function render() {
     renderFilters();
     renderList();
@@ -143,177 +111,11 @@
     return div.innerHTML;
   }
 
-  // ---------- Toast ----------
-  let toastTimer = null;
-  function showToast(message) {
-    el.toast.textContent = message;
-    el.toast.hidden = false;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { el.toast.hidden = true; }, 2400);
+  function render() {
+    renderFilters();
+    renderList();
   }
 
-  // ---------- Member Modal ----------
-  function openMemberModal(member) {
-    state.editingId = member ? member.id : null;
-    el.modalTitle.textContent = member ? 'Edit Member' : 'Add Member';
-    el.submitMemberBtn.textContent = member ? 'Save Changes' : 'Add Member';
-    el.nameInput.value = member ? member.name : '';
-    el.bloodGroupInput.value = member ? member.bloodGroup : '';
-    el.phoneInput.value = member ? member.phone : '';
-    clearErrors();
-    el.memberModal.hidden = false;
-    el.nameInput.focus();
-  }
-
-  function closeMemberModal() {
-    el.memberModal.hidden = true;
-    el.memberForm.reset();
-    state.editingId = null;
-    clearErrors();
-  }
-
-  function clearErrors() {
-    el.nameError.textContent = '';
-    el.bloodGroupError.textContent = '';
-    el.phoneError.textContent = '';
-  }
-
-  function validateForm() {
-    clearErrors();
-    let valid = true;
-    const name = el.nameInput.value.trim();
-    const bloodGroup = el.bloodGroupInput.value;
-    const phone = el.phoneInput.value.trim();
-
-    if (!name) {
-      el.nameError.textContent = 'Name is required';
-      valid = false;
-    }
-    if (!bloodGroup) {
-      el.bloodGroupError.textContent = 'Blood group is required';
-      valid = false;
-    }
-    if (!phone) {
-      el.phoneError.textContent = 'Phone number is required';
-      valid = false;
-    } else if (!/^\d{10}$/.test(phone)) {
-      el.phoneError.textContent = 'Phone number must be exactly 10 digits';
-      valid = false;
-    }
-    return valid ? { name, bloodGroup, phone } : null;
-  }
-
-  function handleMemberSubmit(e) {
-    e.preventDefault();
-    const data = validateForm();
-    if (!data) return;
-
-    if (state.editingId) {
-      const member = state.members.find((m) => m.id === state.editingId);
-      Object.assign(member, data);
-      showToast('Member updated successfully');
-    } else {
-      state.members.push({ id: uid(), ...data });
-      showToast('Member added successfully');
-    }
-    saveMembers();
-    closeMemberModal();
-    render();
-  }
-
-  // ---------- Delete Modal ----------
-  function openDeleteModal(member) {
-    state.deletingId = member.id;
-    el.deleteMessage.textContent = `Are you sure you want to delete "${member.name}"? This action cannot be undone.`;
-    el.deleteModal.hidden = false;
-  }
-
-  function closeDeleteModal() {
-    el.deleteModal.hidden = true;
-    state.deletingId = null;
-  }
-
-  function confirmDelete() {
-    state.members = state.members.filter((m) => m.id !== state.deletingId);
-    saveMembers();
-    closeDeleteModal();
-    showToast('Member deleted');
-    render();
-  }
-
-  // ---------- CSV Export / Import ----------
-  function exportCSV() {
-    const header = 'name,bloodGroup,phone';
-    const rows = state.members.map((m) => `${csvEscape(m.name)},${m.bloodGroup},${m.phone}`);
-    const csv = [header, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'blood-donor-directory.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast('Members exported to CSV');
-  }
-
-  function csvEscape(value) {
-    if (/[",\n]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
-    return value;
-  }
-
-  function parseCSVLine(line) {
-    const result = [];
-    let cur = '';
-    let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (inQuotes) {
-        if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
-        else if (ch === '"') inQuotes = false;
-        else cur += ch;
-      } else if (ch === '"') inQuotes = true;
-      else if (ch === ',') { result.push(cur); cur = ''; }
-      else cur += ch;
-    }
-    result.push(cur);
-    return result;
-  }
-
-  function importCSV(file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const text = String(reader.result);
-      const lines = text.split(/\r?\n/).filter((l) => l.trim() !== '');
-      if (!lines.length) return;
-
-      const header = parseCSVLine(lines[0]).map((h) => h.trim().toLowerCase());
-      const nameIdx = header.indexOf('name');
-      const bgIdx = header.indexOf('bloodgroup');
-      const phoneIdx = header.indexOf('phone');
-      const dataLines = nameIdx === -1 || bgIdx === -1 || phoneIdx === -1 ? lines : lines.slice(1);
-
-      let imported = 0;
-      dataLines.forEach((line) => {
-        const cols = parseCSVLine(line);
-        const name = (nameIdx !== -1 ? cols[nameIdx] : cols[0])?.trim();
-        const bloodGroup = (bgIdx !== -1 ? cols[bgIdx] : cols[1])?.trim();
-        const phone = (phoneIdx !== -1 ? cols[phoneIdx] : cols[2])?.trim();
-        if (name && BLOOD_GROUPS.includes(bloodGroup) && /^\d{10}$/.test(phone)) {
-          state.members.push({ id: uid(), name, bloodGroup, phone });
-          imported++;
-        }
-      });
-
-      saveMembers();
-      render();
-      showToast(`Imported ${imported} member${imported === 1 ? '' : 's'}`);
-    };
-    reader.readAsText(file);
-  }
-
-  // ---------- Events ----------
   function bindEvents() {
     el.searchInput.addEventListener('input', (e) => {
       state.search = e.target.value;
@@ -328,43 +130,12 @@
       renderList();
     });
 
-    el.cancelMemberBtn.addEventListener('click', closeMemberModal);
-    el.memberForm.addEventListener('submit', handleMemberSubmit);
-    el.memberModal.addEventListener('click', (e) => { if (e.target === el.memberModal) closeMemberModal(); });
-
-    el.cancelDeleteBtn.addEventListener('click', closeDeleteModal);
-    el.confirmDeleteBtn.addEventListener('click', confirmDelete);
-    el.deleteModal.addEventListener('click', (e) => { if (e.target === el.deleteModal) closeDeleteModal(); });
-
-    el.memberList.addEventListener('click', (e) => {
-      const card = e.target.closest('.member-card');
-      if (!card) return;
-      const id = card.dataset.id;
-      const member = state.members.find((m) => m.id === id);
-      if (!member) return;
-
-      const actionBtn = e.target.closest('[data-action]');
-      if (!actionBtn) return;
-      const action = actionBtn.dataset.action;
-
-      if (action === 'edit') openMemberModal(member);
-      else if (action === 'delete') openDeleteModal(member);
-    });
-
     el.darkModeToggle.addEventListener('click', toggleTheme);
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (!el.memberModal.hidden) closeMemberModal();
-        if (!el.deleteModal.hidden) closeDeleteModal();
-      }
-    });
   }
 
-  // ---------- Init ----------
-  function init() {
+  async function init() {
     loadTheme();
-    loadMembers();
+    await loadMembers();
     bindEvents();
     render();
 
@@ -373,19 +144,6 @@
       el.app.hidden = false;
     }, 400);
   }
-
-  // Listen for storage changes from other windows (e.g. admin page)
-  window.addEventListener('storage', (e) => {
-    if (e.key === STORAGE_KEY) {
-      try {
-        state.members = e.newValue ? JSON.parse(e.newValue) : [];
-        render();
-        showToast('Directory updated');
-      } catch (err) {
-        // ignore parse errors
-      }
-    }
-  });
 
   document.addEventListener('DOMContentLoaded', init);
 })();

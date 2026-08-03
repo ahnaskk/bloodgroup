@@ -59,54 +59,6 @@
   </p>
 </div>
 
-<!-- Add / Edit Member Modal -->
-<div id="memberModal" class="modal-overlay" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <h2 id="modalTitle">Add Member</h2>
-    <form id="memberForm" novalidate>
-      <div class="field">
-        <label for="nameInput">Full Name</label>
-        <input id="nameInput" type="text" placeholder="e.g. Rahul Kumar" autocomplete="off">
-        <span class="error" id="nameError"></span>
-      </div>
-      <div class="field">
-        <label for="bloodGroupInput">Blood Group</label>
-        <select id="bloodGroupInput">
-          <option value="">Select blood group</option>
-          <option>A+</option><option>A-</option>
-          <option>B+</option><option>B-</option>
-          <option>AB+</option><option>AB-</option>
-          <option>O+</option><option>O-</option>
-        </select>
-        <span class="error" id="bloodGroupError"></span>
-      </div>
-      <div class="field">
-        <label for="phoneInput">Phone Number</label>
-        <input id="phoneInput" type="tel" placeholder="10-digit mobile number" autocomplete="off" maxlength="10">
-        <span class="error" id="phoneError"></span>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-ghost" id="cancelMemberBtn">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="submitMemberBtn">Add Member</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="modal-overlay" hidden>
-  <div class="modal modal-small" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
-    <h2 id="deleteTitle">Delete Member?</h2>
-    <p id="deleteMessage" class="modal-text"></p>
-    <div class="modal-actions">
-      <button type="button" class="btn btn-ghost" id="cancelDeleteBtn">Cancel</button>
-      <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast" class="toast" hidden></div>
-
 <script src="js/app.js"></script>
 </body>
 </html>
