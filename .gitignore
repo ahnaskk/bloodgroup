@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
